@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ibm.mapper.BookMapper">
+
+	<resultMap type="com.ibm.domain.Book" id="bookMap">
+		<id column="book_id" property="bookId"/>
+		<result column="book_name" property="bookName"/>
+		<result column="pages" property="pages"/>
+		<result column="brief" property="brief"/>
+		<result column="on_number" property="onNumber"/>
+		<result column="on_time" property="onTime"/>
+		<result column="off_number" property="offNumber"/>
+		<result column="off_time" property="offTime"/>
+		<result column="surplus_number" property="surplusNumber"/>
+		<association property="type" javaType="com.ibm.domain.Type">
+			 <id column="type_id" property="typeId"/>
+			 <result column="type_name" property="typeName"/>
+		</association>
+		<association property="theme" javaType="com.ibm.domain.Theme" >
+			 <id column="theme_id" property="themeId"/>
+			 <result column="theme_name" property="themeName"/>
+		</association>
+		<association property="country" javaType="com.ibm.domain.Country">
+			 <id column="country_id" property="countryId"/>
+			 <result column="country_name" property="countryName"/>
+		</association>
+	</resultMap>
+
+	<select id="selectAll" resultMap="bookMap">
+		select * 
+		from book, country, theme, type
+		where book.country_id = country.country_id
+		and book.theme_id = theme.theme_id
+		and book.type_id = type.type_id
+	</select>
+	
+	<select id="getById" parameterType="Integer" resultMap="bookMap">
+		select * 
+		from book, country, theme, type
+		where book.country_id = country.country_id
+		and book.theme_id = theme.theme_id
+		and book.type_id = type.type_id
+		and book_id = #{id}
+	</select>
+	
+	<select id="selectByLabel" parameterType="com.ibm.domain.BookLabel" resultMap="bookMap">
+		select * 
+		from book, country, theme, type
+		<where>
+			book.country_id = country.country_id
+			and book.theme_id = theme.theme_id
+			and book.type_id = type.type_id
+			<if test="countryId != null and countryId != 0 ">
+				and book.country_id = #{countryId}
+			</if>
+			<if test="typeId != null and typeId != 0 ">
+				and book.type_id = #{typeId}
+			</if>
+			<if test="themeId != null and themeId != 0 ">
+				and book.theme_id = #{themeId}
+			</if>
+			<if test="lengthRange != null and lengthRange != 0 ">
+				and pages between #{minPage} and #{maxPage}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByKey" parameterType="String" resultMap="bookMap">
+		select *
+		from book, country, theme, type
+		where book.country_id = country.country_id
+		and book.theme_id = theme.theme_id
+		and book.type_id = type.type_id 
+		and (book_name like concat('%', #{key}, '%') 
+		or country_name like concat('%', #{key}, '%') 
+		or type_name like concat('%', #{key}, '%') 
+		or theme_name like concat('%', #{key}, '%') )
+	</select>
+	
+	<insert id="save" parameterType="com.ibm.domain.Book">
+		insert into book(book_name,country_id,type_id,theme_id,pages,brief,on_number,on_time,off_number,off_time,surplus_number) 
+		values (#{bookName},#{country.countryId},#{type.typeId},#{theme.themeId},#{pages},#{brief},#{onNumber},#{onTime},#{offNumber},#{offTime},#{surplusNumber})
+	</insert>
+	
+	<delete id="deleteById" parameterType="Integer">
+		delete from book where book_id = #{id}
+	</delete>
+	
+	<update id="update" parameterType="com.ibm.domain.Book">
+		update book set book_name=#{bookName}, country_id=#{country.countryId}, type_id=#{type.typeId}, theme_id=#{theme.themeId}, pages=#{pages}, brief=#{brief}, 
+		on_number=#{onNumber}, on_time=#{onTime}, off_number=#{offNumber}, off_time=#{offTime}, surplus_number=#{surplusNumber}
+		where book_id=#{bookId}
+	</update>
+	
+</mapper>

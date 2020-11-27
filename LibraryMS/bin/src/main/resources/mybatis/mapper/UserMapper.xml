@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ibm.mapper.UserMapper">
+
+	<insert id="saveUser" parameterType="com.ibm.domain.User">
+		INSERT 
+		USER(name,sex,age,email,password,birthday,phone,address,introduction,identity,books_number) 
+		VALUE 
+		(#{name},#{sex},#{age},#{email},#{password},#{birthday},#{phone},#{address},#{introduction},0,3)
+	</insert>
+	
+	<select id="getUserByName" parameterType="string" resultType="com.ibm.domain.User">
+		select * from user where name=#{name}
+	</select>
+	
+	<select id="getUserById" parameterType="int" resultType="com.ibm.domain.User">
+		select * from user where user_id=#{id}
+	</select>
+	
+	<update id="updateUser" parameterType="com.ibm.domain.User">
+		update USER 
+		set 
+		name=#{name},sex=#{sex},age=#{age},email=#{email},password=#{password},birthday=#{birthday},phone=#{phone},
+		address=#{address},introduction=#{introduction},identity=#{identity},books_number=#{booksNumber} 
+		where user_id=#{userId}
+	</update>
+	
+	<select id="selectAllUser" resultType="com.ibm.domain.User">
+		select * from user order by name
+	</select>
+	
+	<select id="selectUserListByVagueName" resultType="com.ibm.domain.User">
+		select * from user where name like concat('%', #{vagueName}, '%') order by name
+	</select>
+	
+	<select id="selectBorrowingDetailsByUserId" parameterType="int" resultType="com.ibm.domain.BorrowingDetails">
+		SELECT user_id,name,book_id,book_name,user.name name,borrow_time,deadline,valid_time,borrow_stutas,return_time 
+		FROM user 
+		INNER JOIN (SELECT book.book_id book_id,book_name,borrow_time,deadline,valid_time,borrow_stutas,return_time FROM borrow  
+		INNER JOIN book ON book.book_id=borrow.book_id where user_id=#{userId} and borrow_stutas=1) book_borrow 
+		ON user.user_id=#{userId}
+	</select>
+	
+	<delete id="deleteUser" parameterType="int">
+		delete user,borrow from user left join borrow on user.user_id=borrow.user_id where user.user_id=#{userId};
+	</delete>
+</mapper>

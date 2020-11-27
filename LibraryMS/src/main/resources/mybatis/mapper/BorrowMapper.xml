@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ibm.mapper.BorrowMapper">
+
+	<resultMap type="com.ibm.domain.BorrowingDetails"
+		id="borrowingDetailsMap">
+		<result column="borrow_time" property="borrowTime" />
+		<result column="deadline" property="deadline" />
+		<result column="return_time" property="returnTime" />
+		<result column="valid_time" property="validTime" />
+		<result column="borrow_states" property="borrowStates" />
+		<association property="user"
+			javaType="com.ibm.domain.User">
+			<id column="user_id" property="userId" />
+			<result column="name" property="name" />
+		</association>
+		<association property="book"
+			javaType="com.ibm.domain.Book">
+			<id column="book_id" property="bookId" />
+			<result column="book_name" property="bookName" />
+			<association property="type"
+			javaType="com.ibm.domain.Type">
+				<id column="type_id" property="typeId" />
+				<result column="type_name" property="typeName" />
+			</association>
+			<association property="country"
+			javaType="com.ibm.domain.Country">
+				<id column="country_id" property="countryId" />
+				<result column="country_name" property="countryName" />
+			</association>
+		</association>
+	</resultMap>
+
+	<select id="selectBorrowsByBookId" parameterType="Integer"
+		resultMap="borrowingDetailsMap">
+		select borrow.*, user.name, book.book_name
+		from user, book,
+		borrow
+		where user.user_id = borrow.user_id
+		and book.book_id =
+		borrow.book_id
+		and book.book_id = #{id}
+	</select>
+
+	<select id="selectAll" resultMap="borrowingDetailsMap">
+		select borrow.*, user.name,
+		book.book_name
+		from user, book, borrow
+		where user.user_id =
+		borrow.user_id
+		and book.book_id = borrow.book_id
+	</select>
+	
+	<select id="getBorrowById" parameterType="Integer" resultMap="borrowingDetailsMap">
+		select borrow.*, user.name, book.book_name
+		from user, book, borrow
+		where user.user_id = borrow.user_id
+		and book.book_id = borrow.book_id
+		and borrow_id = #{borrowId}
+	</select>
+
+	<select id="selectByKey"
+		resultMap="borrowingDetailsMap">
+		select borrow.*, user.name, book.book_name
+		from user, book,
+		borrow
+		where user.user_id = borrow.user_id
+		and book.book_id = borrow.book_id
+		and borrow.user_id = #{userId}
+		and (user.name like concat('%', #{key}, '%') or
+		book.book_name like concat('%', #{key}, '%'))
+	</select>
+
+	<select id="getCountByDay" resultType="Integer">
+		select count(*) from borrow
+		where
+		<if test="boOrRu == 1">
+			borrow_time = #{day}
+		</if>
+		<if test="boOrRu == 2">
+			return_time = #{day}
+		</if>
+	</select>
+
+	<select id="getCountByMon" resultType="Integer">
+		select count(*) from borrow
+		where
+		<if test="boOrRu == 1">
+			borrow_time between concat(#{mon},'-01') and
+			concat(#{mon},'-31')
+		</if>
+		<if test="boOrRu == 2">
+			return_time between concat(#{mon}, '-01') and
+			concat(#{mon}, '-31')
+		</if>
+	</select>
+
+	<select id="getCountByYear" resultType="Integer">
+		select count(*) from borrow
+		where
+		<if test="boOrRu == 1">
+			borrow_time between concat(#{year},'-01-01') and
+			concat(#{year},'-12-31')
+		</if>
+		<if test="boOrRu == 2">
+			return_time between concat(#{year}, '-01-01') and
+			concat(#{year}, '-12-31')
+		</if>
+	</select>
+
+	<insert id="save"
+		parameterType="com.ibm.domain.BorrowingDetails">
+		insert into
+		borrow(user_id,book_id,borrow_time,deadline,valid_time,borrow_states,return_time)
+		values
+		(#{borrow.user.userId},#{borrow.book.bookId},#{borrow.borrowTime},#{borrow.deadline},#{borrow.validTime},#{borrow.borrowStates},#{borrow.returnTime})
+	</insert>
+
+	<delete id="deleteById">
+		delete from borrow where user_id = #{uid} and book_id
+		= #{bid}
+	</delete>
+
+	<update id="update"
+		parameterType="com.ibm.domain.BorrowingDetails">
+		update borrow set
+		user_id=#{borrow.user.userId}, book_id=#{borrow.book.bookId}, borrow_time=#{borrow.borrowTime},
+		deadline=#{borrow.deadline},
+		valid_time=#{borrow.validTime},
+		borrow_states=#{borrow.borrowStates}, return_time=#{borrow.returnTime}
+		where user_id = #{borrow.user.userId} and
+		book_id=#{borrow.book.bookId}
+	</update>
+
+	<update id="updateStatesById">
+		update borrow set borrow_states = 0, return_time = #{reTime}
+		where borrow_id = #{borrowId}
+	</update>
+
+	<select id="selectByBookIdAndUserId"
+		parameterType="com.ibm.domain.BorrowingDetails"
+		resultMap="borrowingDetailsMap">
+		select * from borrow
+		<where>
+			<if test="userId!=null and userId!=''">
+				user_id = #{borrow.user.userId}
+			</if>
+			<if test="bookId!=null and bookId!=''">
+				and book_id = #{borrow.book.bookId}
+			</if>
+		</where>
+	</select>
+
+</mapper>

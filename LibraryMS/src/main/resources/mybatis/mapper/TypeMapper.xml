@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ibm.mapper.TypeMapper">
+
+	<select id="selectAll" resultType="com.ibm.domain.Type">
+		select * from type
+	</select>
+	
+	<select id="getById" parameterType="Integer" resultType="com.ibm.domain.Type">
+		select * from type where type_id = #{id}
+	</select>
+	
+	<select id="getIdByName" parameterType="String" resultType="Integer">
+		select type_id from type where type_name = #{name}
+	</select>
+	
+	<insert id="save" parameterType="com.ibm.domain.Type">
+		insert into type(type_name) values (#{typeName})
+	</insert>
+	
+	<delete id="deleteById" parameterType="Integer">
+		delete from type where type_id = #{id}
+	</delete>
+	
+	<update id="update" parameterType="com.ibm.domain.Type">
+		update type set type_name=#{typeName} where type_id = #{typeId}
+	</update>
+</mapper>

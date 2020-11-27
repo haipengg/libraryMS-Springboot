@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ibm.mapper.AnnounceMapper">
+
+	<select id="getAnnounce" resultType="com.ibm.domain.Announce">
+		select * from announce where announce_id = 1;
+	</select>
+	
+	<update id="deleteAnnounce">
+		update announce
+		set announce_time = null, announce_content = null
+		where announce_id = 1;
+	</update>
+	
+	
+	<update id="updateAnnounce" parameterType="com.ibm.domain.Announce">
+		update announce
+		set announce_time = #{announceTime}, announce_content = #{announceContent}
+		where announce_id = 1;
+	</update>
+
+</mapper>
